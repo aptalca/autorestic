@@ -3,7 +3,7 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "aptalca/restic"
+  ENDPOINT: "aptalca/autorestic"
 
 jobs:
   build:
