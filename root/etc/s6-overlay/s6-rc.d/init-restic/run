@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bash
+
+# create folders
+mkdir -p \
+    /config/{logs,crontabs}
+
+# copy default crontabs
+[[ ! -f /config/crontabs/root ]] && \
+    cp /etc/crontabs/root /config/crontabs/
+
+# import user crontabs
+rm /etc/crontabs/*
+cp /config/crontabs/* /etc/crontabs/
+
+# permissions
+chown -R abc:abc \
+    /config
