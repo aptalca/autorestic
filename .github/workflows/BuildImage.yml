@@ -1,0 +1,53 @@
+name: Build Image
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  ENDPOINT: "aptalca/restic"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.6
+
+      - name: Versions
+        run: |
+          RESTIC_RELEASE=$(curl -sX GET "https://api.github.com/repos/restic/restic/releases/latest" \
+            | jq -r '.tag_name' | sed 's|^v||')
+          AUTORESTIC_RELEASE=$(curl -sX GET "https://api.github.com/repos/cupcakearmy/autorestic/releases/latest" \
+            | jq -r '.tag_name' | sed 's|^v||')
+          APP_VERSIONS="${RESTIC_RELEASE}-${AUTORESTIC_RELEASE}"
+          echo "APP_VERSIONS=${APP_VERSIONS}" >> $GITHUB_ENV
+      - name: Build image
+        run: |
+          docker build --no-cache --build-arg APP_VERSIONS=${APP_VERSIONS} -t ${{ github.sha }} .
+      - name: Tag image
+        if: ${{ github.ref == format('refs/heads/main') }}
+        run: |
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${{ github.sha }}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:${APP_VERSIONS}
+          docker tag ${{ github.sha }} ghcr.io/${ENDPOINT}:latest
+          docker tag ${{ github.sha }} ${ENDPOINT}:${{ github.sha }}
+          docker tag ${{ github.sha }} ${ENDPOINT}:${APP_VERSIONS} 
+          docker tag ${{ github.sha }} ${ENDPOINT}:latest
+      - name: Login to GitHub Container Registry
+        if: ${{ github.ref == format('refs/heads/main') }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u aptalca --password-stdin
+      - name: Push tags to GitHub Container Registry
+        if: ${{ github.ref == format('refs/heads/main') }}
+        run: |
+          docker push ghcr.io/${ENDPOINT}:${{ github.sha }}
+          docker push ghcr.io/${ENDPOINT}:${APP_VERSIONS}
+          docker push ghcr.io/${ENDPOINT}:latest
+      - name: Login to DockerHub
+        if: ${{ github.ref == format('refs/heads/main') }}
+        run: |
+          echo ${{ secrets.DOCKERPASS }} | docker login -u aptalca --password-stdin
+      - name: Push tags to DockerHub
+        if: ${{ github.ref == format('refs/heads/main') }}
+        run: |
+          docker push ${ENDPOINT}:${{ github.sha }}
+          docker push ${ENDPOINT}:${APP_VERSIONS}
+          docker push ${ENDPOINT}:latest
