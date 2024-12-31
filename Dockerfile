@@ -5,6 +5,8 @@ LABEL org.opencontainers.image.source=https://github.com/aptalca/autorestic
 
 ARG APP_VERSIONS
 
+ENV HOME="/config"
+
 RUN \
   echo "**** install runtime packages ****" && \
   apk add --no-cache --upgrade \
