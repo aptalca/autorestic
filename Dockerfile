@@ -11,7 +11,8 @@ RUN \
   echo "**** install runtime packages ****" && \
   apk add --no-cache --upgrade \
     bzip2 \
-    logrotate && \
+    logrotate \
+    screen && \
   echo "**** install restic and autorestic ****" && \
   if [ -z "${APP_VERSIONS+x}" ]; then \
     RESTIC_RELEASE=$(curl -sX GET "https://api.github.com/repos/restic/restic/releases/latest" \
