@@ -64,7 +64,7 @@ jobs:
           AUTORESTIC_RELEASE=$(curl -sX GET "https://api.github.com/repos/cupcakearmy/autorestic/releases/latest" \
             | jq -r '.tag_name' | sed 's|^v||')
           APP_VERSIONS="${RESTIC_RELEASE}-${AUTORESTIC_RELEASE}"
-          if [ -z "${APP_VERSIONS}" ] || [ "${APP_VERSIONS}" = "null" ]; then
+          if [ -z "${RESTIC_RELEASE}" ] || [ "${RESTIC_RELEASE}" = "null" ] || [ -z "${AUTORESTIC_RELEASE}" ] || [ "${AUTORESTIC_RELEASE}" = "null" ]; then
             echo "Unable to retrieve Restic/Autorestic versions. Skipping."
             echo "Unable to retrieve Restic/Autorestic versions. Skipping." >> $GITHUB_STEP_SUMMARY
             APP_VERSIONS=$(cat app_versions.txt)
